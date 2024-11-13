@@ -222,7 +222,6 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Globals/Inc"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Release/drivers/Src"/>
 						<entry excluding="001_LedToggle.c|004_ExternalButton.c|06_SPISendData.c|syscalls.c|ADXL345_interfacing.c|002_LedToggleWithOpenDrain.c|dht11_interface.c|003_LedToggleWithOnBoardButton.c|07_SpiArduinoSendData.c|main.c|005_ExternalButtonWithInterruptImplementation.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers/Src"/>
