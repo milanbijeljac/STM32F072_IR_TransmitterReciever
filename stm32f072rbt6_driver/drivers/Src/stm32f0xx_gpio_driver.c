@@ -397,3 +397,13 @@ uint8 GPOIx_u_PortCheck(GPIO_TypeDef *pGPIOx)
 
 	return u_retVal;
 }
+
+void GPIOx_v_GPIOCfgStructClear(GPIO_PinConfig_t * pGpioCfg)
+{
+	pGpioCfg->GPIO_PinAltFunMode = 0u;
+	pGpioCfg->GPIO_PinMode = 0u;
+	pGpioCfg->GPIO_PinNumber = 0u;
+	pGpioCfg->GPIO_PinOPType = 0u;
+	pGpioCfg->GPIO_PinPuPdControl = 0u;
+	pGpioCfg->GPIO_PinSpeed = 0u;
+}

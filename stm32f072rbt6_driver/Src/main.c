@@ -27,27 +27,22 @@
 #include <sys_frequency.h>
 #include <sys_timer.h>
 #include <NEC_transmission.h>
+#include <TemperatureCalculation.h>
 
 /* **************************************************
  *					DEFINES 					    *
  *************************************************  */
 
-#define V_REF 3.3   /* Reference voltage */
+#define CHECK_TEMP_UPPER      0u
+#define AC_POWER_ON       	  1u
+#define CHECK_IF_AC_IS_ON 	  2u
+#define CHECK_TEMP_LOWER	  3u
+#define AC_POWER_OFF		  4u
+#define CHECK_IF_AC_IS_OFF	  5u
 
-#define R1 10000.0  /* Resistance at temperature T1 (in ohms) */
-#define T1 25.0     /* Temperature at R1 (in Celsius) */
-
-#define R2 12500.0  /* Resistance at temperature T2 (in ohms) */
-#define T2 30.0     /* Temperature at R2 (in Celsius) */
-
-/* **************************************************
- *			    GLOBAL VARIABLES 					*
- *************************************************  */
-
-volatile float  f_temperature = 0.0f;
-volatile float  f_resistance  = 0.0f;
-volatile float  f_voltage     = 0.0f;
-volatile uint32 u_adcValue    = 0u;
+#define UPPER_TEMP_THRESHOLD  25.0f
+#define LOWER_TEMP_THRESHOLD  20.0f
+#define DEBOUNCE_UP_THRESHOLD 15u
 
 /* **************************************************
  *			    FUNCTION PROTOTYPE 					*
@@ -63,76 +58,169 @@ static void GPIO_Config(void);
 
 static void GPIO_Config(void)
 {
+	/* TODO: Add compiler switches for different modes, currently not all of this code needs to be executed */
+
 	GPIO_v_PeripheralClockControl(GPIOB, ENABLE);
 	GPIO_v_PeripheralClockControl(GPIOA, ENABLE);
 
-	GPIO_PinConfig_t GPIO_PinConfigurationPortB;
-	GPIO_PinConfig_t GPIO_PinConfigurationPortA;
+	GPIO_PinConfig_t GPIO_PinConfiguration;
 
+	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
 	/* Pin used as an input for IR receiver */
-	GPIO_PinConfigurationPortB.GPIO_PinNumber = 12u;
-	GPIO_PinConfigurationPortB.GPIO_PinMode = FALING_TRIGGER;
-	GPIO_PinConfigurationPortB.GPIO_PinPuPdControl = PULL_UP;
+	GPIO_PinConfiguration.GPIO_PinNumber = 12u;
+	GPIO_PinConfiguration.GPIO_PinMode = FALING_TRIGGER;
+	GPIO_PinConfiguration.GPIO_PinPuPdControl = PULL_UP;
 
-	GPIO_v_Init(GPIOB, GPIO_PinConfigurationPortB);
+	GPIO_v_Init(GPIOB, GPIO_PinConfiguration);
 
 	/* Interrupt configuration */
 	GPIO_v_IRQInteruptConfig(IRQ_EXTI4_15, ENABLE);
 	GPIO_v_IRQPrioConfig(IRQ_EXTI4_15, 1u);
 
-	/* Analog pin configuration */
-	GPIO_PinConfigurationPortB.GPIO_PinNumber = 1u;
-	GPIO_PinConfigurationPortB.GPIO_PinMode = ANALOG_MODE;
+	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
 
-	GPIO_v_Init(GPIOB, GPIO_PinConfigurationPortB);
+	/* Analog pin configuration - used for temperature sensor */
+	GPIO_PinConfiguration.GPIO_PinNumber = 1u;
+	GPIO_PinConfiguration.GPIO_PinMode = ANALOG_MODE;
+
+	GPIO_v_Init(GPIOB, GPIO_PinConfiguration);
+
+	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
 
 	/* IR transmitter configuration. AF2 == TIM2_CH1_ETR */
-	GPIO_PinConfigurationPortA.GPIO_PinNumber = 0u;
-	GPIO_PinConfigurationPortA.GPIO_PinOPType = 0u;
-	GPIO_PinConfigurationPortA.GPIO_PinMode = ALTERNATE_FUNCTION_MODE;
-	GPIO_PinConfigurationPortA.GPIO_PinAltFunMode = AF2;
+	GPIO_PinConfiguration.GPIO_PinNumber = 0u;
+	GPIO_PinConfiguration.GPIO_PinMode = ALTERNATE_FUNCTION_MODE;
+	GPIO_PinConfiguration.GPIO_PinAltFunMode = AF2;
 
-	GPIO_v_Init(GPIOA, GPIO_PinConfigurationPortA);
+	GPIO_v_Init(GPIOA, GPIO_PinConfiguration);
 
+	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
 }
 
 int main(void)
 {
 	initialise_monitor_handles();
 
+	uint8  u_acState      = CHECK_TEMP_UPPER;
+	sint8  u_debounce     = 0u;
+	uint16 u_adcValue     = 0u;
+	uint32 u_code[3]      = {0xFF00FF00u, 0xFF00EB14u, 0xFE0154AB};
+	float  f_temperature  = 0.0f;
+	float  f_tempOld      = 0.0f;
+
 	/* 16 MHz frequency */
 	PLL_Enable(RCC_CFGR_PLLMUL4);
 
-	/* Timer initialization */
 	TIM3_v_cfg(16u);
 
 	GPIO_Config();
 
-	ADCx_u_Init(ADC1, 0u);
+	ADCx_u_Init(ADC1, 9u);
 
 	TIM2_v_IrFrequencyCfg();
 
 	while(1)
 	{
-		uint32 code = 0x807F02FDu;
+		/* Not tested  */
+        switch (u_acState) {
+			case CHECK_TEMP_UPPER:
 
-		Delay_v_ms(15000u);
+				  u_adcValue = ADCx_u_Read(ADC1);
+				  f_temperature = Temp_f_CalculateTemperature(u_adcValue);
+				  Delay_v_ms(500u);
 
-        NEC_v_SendMessage(&code, 1u);
+				  if(f_temperature > UPPER_TEMP_THRESHOLD)
+				  {
+					  u_debounce++;
+				  }
+				  else if(u_debounce != -127)
+				  {
+					  u_debounce--;
+				  }
 
-        Delay_v_ms(1500u);
+				  if(u_debounce > DEBOUNCE_UP_THRESHOLD)
+				  {
+					  u_acState =  AC_POWER_ON;
+					  u_debounce = 0;
+				  }
 
-	    /*	Temperature measurement
-	     *
-	     * u_adcValue = ADCx_u_Read(ADC1);
+				break;
+			case AC_POWER_ON:
 
-	    f_voltage = (u_adcValue / 4095.0) * V_REF;
+				NEC_v_SendMessage(u_code, sizeof(u_code));
+				u_acState = CHECK_IF_AC_IS_ON;
 
-	    f_resistance = (V_REF * 10000.0 / f_voltage) - 10000.0;
+				break;
+			case CHECK_IF_AC_IS_ON:
 
-	    float m = (T2 - T1) / (R2 - R1);
-	    float b = T1 - m * R1;
+				u_adcValue = ADCx_u_Read(ADC1);
+				f_tempOld = Temp_f_CalculateTemperature(u_adcValue);
 
-	    f_temperature = m * f_resistance + b; */
+				Delay_v_seconds(240u);  /* Wait 6 minutes and check if temperature drops. TODO: Change this logic */
+
+				u_adcValue = ADCx_u_Read(ADC1);
+				f_temperature = Temp_f_CalculateTemperature(u_adcValue);
+
+				if(f_temperature > f_tempOld)
+				{
+					u_acState = AC_POWER_ON;	/* AC did not receive signal correctly, send signal again */
+				}
+				else
+				{
+					u_acState = CHECK_TEMP_LOWER;
+				}
+
+				break;
+			case CHECK_TEMP_LOWER:
+
+				  u_adcValue = ADCx_u_Read(ADC1);
+				  f_temperature = Temp_f_CalculateTemperature(u_adcValue);
+				  Delay_v_ms(500u);
+				  if((f_temperature < LOWER_TEMP_THRESHOLD) && (u_debounce != 128u))
+				  {
+					  u_debounce++;
+				  }
+				  else if(u_debounce != -127)
+				  {
+					  u_debounce--;
+				  }
+
+				  if(u_debounce > DEBOUNCE_UP_THRESHOLD)
+				  {
+					  u_acState =  AC_POWER_OFF;
+					  u_debounce = 0;
+				  }
+
+				break;
+			case AC_POWER_OFF:
+
+				NEC_v_SendMessage(u_code, sizeof(u_code));
+				u_acState = CHECK_IF_AC_IS_ON;
+
+				break;
+			case CHECK_IF_AC_IS_OFF:
+
+				u_adcValue = ADCx_u_Read(ADC1);
+				f_tempOld = Temp_f_CalculateTemperature(u_adcValue);
+
+				Delay_v_seconds(240u);  /* Wait 6 minutes and check if temperature drops. TODO: Change this logic */
+
+				u_adcValue = ADCx_u_Read(ADC1);
+				f_temperature = Temp_f_CalculateTemperature(u_adcValue);
+
+				if(f_tempOld > f_temperature)
+				{
+					u_acState = AC_POWER_OFF; /* AC did not receive signal correctly, send signal again */
+				}
+				else
+				{
+					u_acState = CHECK_TEMP_LOWER;
+				}
+
+				break;
+			default:
+				u_acState = CHECK_TEMP_UPPER;
+				break;
+		}
 	}
 }
