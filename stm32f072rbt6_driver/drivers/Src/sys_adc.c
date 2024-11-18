@@ -57,7 +57,7 @@ uint8 ADCx_u_Init(ADC_TypeDef* p_ADCx, uint8 channel)
 
 	Delay_v_ms(100u);
 
-	p_ADCx->CFGR1  &= ~(1u << 13u);      /* Single conversion mode */
+	p_ADCx->CFGR1  |=   1u << 13u;       /* Continuous conversion mode */
 	p_ADCx->CFGR1  &= ~(3u << 3u);       /* 12 bit mode */
 	p_ADCx->CHSELR |=   1u << channel;   /* Channel select */
 	p_ADCx->CR     |=   1u << 0u;        /* Enable ADC */
