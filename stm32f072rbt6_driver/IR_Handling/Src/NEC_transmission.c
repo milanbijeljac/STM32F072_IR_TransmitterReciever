@@ -4,18 +4,102 @@
 
 #include <NEC_transmission.h>
 #include <sys_timer.h>
+#include <config.h>
 
 /* **************************************************
  *					DEFINES 					    *
  *************************************************  */
 
-#define NEC_PULSE_SHORT    560u   /* 560us for a '0' bit pulse   */
-#define NEC_PULSE_LONG     1690u  /* 1.7ms for a '1' bit pulse   */
-#define NEC_LEADING_BURST  9000u  /* 9ms for the leading burst   */
-#define NEC_LEADING_SPACE  4500u  /* 4.5ms for the leading space */
-#define NEC_FINAL_BURST    560u   /* 560us for the final burst   */
-#define NEC_BIT_LENGHT     32u
+#define NEC_PULSE_SHORT    		     560u   		/* 560us for a '0' bit pulse   	*/
+#define NEC_PULSE_LONG     			 1690u  		/* 1.7ms for a '1' bit pulse   	*/
+#define NEC_FINAL_BURST	   			 560u
+#define NEC_PREFINAL_BURST_ZHJT03    7400u
+#define NEC_BIT_LENGHT     			 32u
 
+#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+	#define NEC_LEADING_BURST  6100u
+#else
+	#define NEC_LEADING_BURST  9000u
+#endif
+
+#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+	#define NEC_LEADING_SPACE  7300u
+#else
+	#define NEC_LEADING_SPACE  4500u
+#endif
+
+
+/* **************************************************
+ *			    FUNCTION PROTOTYPE 					*
+ *************************************************  */
+
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+static void NEC_PulseOn(void);
+
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+static void NEC_PulseOff(void);
+
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+static void NEC_v_SendWholePulse(uint32 duration);
+
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+static void NEC_v_SendBit(uint8 u_bit);
+
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+static void NEC_v_SendLeadingPulseBurst(void);
+
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+static void NEC_v_SendFinalPulseBurst(void);
+
+/****************************************************/
 
 static void NEC_PulseOn(void)
 {
@@ -29,12 +113,12 @@ static void NEC_PulseOff(void)
     TIM2->CR1 &= ~TIM_CR1_CEN;
 }
 
-void NEC_v_SendWholePulse(uint32 duration)
+static void NEC_v_SendWholePulse(uint32 duration)
 {
     NEC_PulseOn();
-    Delay_v_us(duration);
+    Delay_v_us(499u);
     NEC_PulseOff();
-    Delay_v_us(560u);
+    Delay_v_us(duration);
 }
 
 static void NEC_v_SendBit(uint8 u_bit)
@@ -49,7 +133,7 @@ static void NEC_v_SendBit(uint8 u_bit)
     }
 }
 
-void NEC_v_SendLeadingPulseBurst(void)
+static void NEC_v_SendLeadingPulseBurst(void)
 {
 	NEC_PulseOn();
     Delay_v_us(NEC_LEADING_BURST);
@@ -57,11 +141,17 @@ void NEC_v_SendLeadingPulseBurst(void)
     Delay_v_us(NEC_LEADING_SPACE);
 }
 
-void NEC_v_SendFinalPulseBurst(void)
+static void NEC_v_SendFinalPulseBurst(void)
 {
 	NEC_PulseOn();
+	Delay_v_us(NEC_FINAL_BURST);
+    NEC_PulseOff();
+#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+    Delay_v_us(NEC_PREFINAL_BURST_ZHJT03);
+    NEC_PulseOn();
     Delay_v_us(NEC_FINAL_BURST);
     NEC_PulseOff();
+#endif
 }
 
 void NEC_v_SendMessage(uint32 *codeBuffer, uint8 u_size)
@@ -81,4 +171,5 @@ void NEC_v_SendMessage(uint32 *codeBuffer, uint8 u_size)
 		}
 	}
 	NEC_v_SendFinalPulseBurst();
+
 }
