@@ -27,12 +27,15 @@
 	static uint16 u_timeDiffMatrix[3][32];
 #endif
 
+volatile uint8 u_counterInterruptTrigger = 0u;
+
 static uint32 u_code[3]  = {0,0,0};
 
 /****************************************************/
 
 void EXTI4_15_IRQHandler(void)
 {
+	u_counterInterruptTrigger++;
 	EXTI->IMR &= ~(1 << 12u); /* Disable interrupt */
 
 	GPIO_v_IRQHandling(12u);
@@ -121,7 +124,7 @@ void EXTI4_15_IRQHandler(void)
 				u_timeDiff = u_timeFallingEdge - u_timeRisingEdge;
 
 				#if DEBUGG_MODE == STD_ON
-					array[i][j] = u_timeDiff;
+				u_timeDiffMatrix[i][j] = u_timeDiff;
 				#endif
 
 				if (u_timeDiff > ZHJT03_SEPARATOR)
@@ -137,6 +140,10 @@ void EXTI4_15_IRQHandler(void)
 	}
 
 	/* Wait for end impulse to avoid triggering interrupt again. */
+	while(GPIO_u_ReadFromInputPin(GPIOB, 12u));
+
+	while(!GPIO_u_ReadFromInputPin(GPIOB, 12u));
+
 	while(GPIO_u_ReadFromInputPin(GPIOB, 12u));
 
 	while(!GPIO_u_ReadFromInputPin(GPIOB, 12u));
