@@ -4,6 +4,13 @@
 
 #include <sys_timer.h>
 
+/* **************************************************
+ *					DEFINES 					    *
+ *************************************************  */
+
+#define US_TO_MS 1000u
+#define MS_TO_S  1000u
+
 /****************************************************/
 
 void TIM3_v_cfg(uint8 u_frequency)
@@ -14,7 +21,6 @@ void TIM3_v_cfg(uint8 u_frequency)
 
 	/* APB bus clock speed is currently set at value provided as argument
 	 * frequency (-1 since PSC register is configured that way)             */
-
 	TIM3->PSC = u_frequency - 1u;
 	TIM3->ARR = 0xFFFFu;
 	TIM3->CR1 |= 1u << 0u;
