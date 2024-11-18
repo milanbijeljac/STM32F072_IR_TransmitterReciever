@@ -274,4 +274,15 @@ void GPIOx_v_BitSetResetConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinCo
  */
 uint8 GPOIx_u_PortCheck(GPIO_TypeDef *pGPIOx);
 
+/**
+ *
+ * \brief      - TODO
+ * \param[in]  - TODO
+ * \param[out] - TODO
+ * \return     - TODO
+ * \globals    - TODO
+ *
+ */
+void GPIOx_v_GPIOCfgStructClear(GPIO_PinConfig_t * pGpioCfg);
+
 #endif /* INC_STM32F0XX_GPIO_DRIVER_H_ */
