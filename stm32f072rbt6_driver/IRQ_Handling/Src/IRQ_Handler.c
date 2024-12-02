@@ -56,7 +56,7 @@ void EXTI4_15_IRQHandler(void)
 
 	u_timeDiff = u_timeFallingEdge - u_timeRisingEdge;
 
-	#if	(NEC_PROTOCOL == STD_ON && ZHJT03_REMOTE == STD_OFF)
+	#if	(STANDARD_REMOTE == STD_ON && ZHJT03_REMOTE == STD_OFF)
 	if( (u_timeDiff > REPETITION_LOW_LIMIT) && (u_timeDiff < REPETITION_HIGH_LIMIT) )
 	{
 		/* Repetition, leave last code value. */
@@ -97,7 +97,7 @@ void EXTI4_15_IRQHandler(void)
 	}
 	#endif
 
-	#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+	#if (ZHJT03_REMOTE == STD_ON && STANDARD_REMOTE == STD_OFF)
 	if( (u_timeDiff > REPETITION_LOW_LIMIT) && (u_timeDiff < REPETITION_HIGH_LIMIT) )
 	{
 		/* Repetition, leave last code value. */

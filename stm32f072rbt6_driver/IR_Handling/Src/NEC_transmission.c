@@ -16,13 +16,13 @@
 #define NEC_PREFINAL_BURST_ZHJT03    7400u
 #define NEC_BIT_LENGHT     			 32u
 
-#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+#if (ZHJT03_REMOTE == STD_ON && STANDARD_REMOTE == STD_OFF)
 	#define NEC_LEADING_BURST  6100u
 #else
 	#define NEC_LEADING_BURST  9000u
 #endif
 
-#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+#if (ZHJT03_REMOTE == STD_ON && STANDARD_REMOTE == STD_OFF)
 	#define NEC_LEADING_SPACE  7300u
 #else
 	#define NEC_LEADING_SPACE  4500u
@@ -146,7 +146,7 @@ static void NEC_v_SendFinalPulseBurst(void)
 	NEC_PulseOn();
 	Delay_v_us(NEC_FINAL_BURST);
     NEC_PulseOff();
-#if (ZHJT03_REMOTE == STD_ON && NEC_PROTOCOL == STD_OFF)
+#if (ZHJT03_REMOTE == STD_ON && STANDARD_REMOTE == STD_OFF)
     Delay_v_us(NEC_PREFINAL_BURST_ZHJT03);
     NEC_PulseOn();
     Delay_v_us(NEC_FINAL_BURST);
