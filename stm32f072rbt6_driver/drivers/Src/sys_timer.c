@@ -51,14 +51,19 @@ void Delay_v_seconds(uint16 seconds)
 
 void TIM2_v_IrFrequencyCfg(void)
 {
-	RCC->APB1ENR |= 1u << 0u;
+	/* Timer configuration for IR signal (38 kHz) */
 
-    /* Configure TIM2 for 38kHz */
-	TIM2->PSC = 16u - 1u;
-	TIM2->ARR = 26u - 1u;
-	TIM2->CCR1 = 13u;
+    RCC->APB1ENR |= 1 << 0u;
 
-    /* Set PWM mode 1 on TIM2 Channel 1 (active when counter < CCR1) */
-	TIM2->CCMR1 |= TIM_CCMR1_OC1M_0 | TIM_CCMR1_OC1M_1; /* PWM mode 1, TIM_CCMR1_OC1M_Pos = 4 */
-	TIM2->CCER |= TIM_CCER_CC1E;  /* Enable capture/compare on CH1 */
+    TIM2->PSC  = 1 - 1;               /* PSC is 1, full clock speed needed  */
+    TIM2->ARR  = 419u; 			     /* ARR for 38kHz = (fconfigured/fdesired) - 1 */
+    TIM2->CCR1 = 210u;               /* Set duty cycle to 50%, ARR / 2 */
+
+    TIM2->CCMR1 &= ~(7u << 4u);
+    TIM2->CCMR1 |= (6u << 4u); 		 /* Set PWM mode 1 */
+    TIM2->CCMR1 |= 1u << 3u;         /* Enable output compare preload */
+
+    TIM2->CCER |= 1u << 0u;          /* Enable capture/compare on channel 1 */
+    TIM2->CR1  |= 1u << 7u;          /* Enable auto-reload preload */
+    TIM2->CR1  |= 1u << 0u;          /* Enable timer */
 }
