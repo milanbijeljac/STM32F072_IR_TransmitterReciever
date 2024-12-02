@@ -40,9 +40,9 @@
 #define AC_POWER_OFF		  4u
 #define CHECK_IF_AC_IS_OFF	  5u
 
-#define UPPER_TEMP_THRESHOLD  25.0f
-#define LOWER_TEMP_THRESHOLD  20.0f
-#define DEBOUNCE_UP_THRESHOLD 15u
+#define UPPER_TEMP_THRESHOLD  28.0f
+#define LOWER_TEMP_THRESHOLD  23.5f
+#define DEBOUNCE_UP_THRESHOLD (sint8)15u
 
 /* **************************************************
  *			    FUNCTION PROTOTYPE 					*
@@ -66,6 +66,7 @@ static void GPIO_Config(void)
 	GPIO_PinConfig_t GPIO_PinConfiguration;
 
 	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
+#if (CAPTURE_MODE == STD_ON)
 	/* Pin used as an input for IR receiver */
 	GPIO_PinConfiguration.GPIO_PinNumber = 12u;
 	GPIO_PinConfiguration.GPIO_PinMode = FALING_TRIGGER;
@@ -78,6 +79,7 @@ static void GPIO_Config(void)
 	GPIO_v_IRQPrioConfig(IRQ_EXTI4_15, 1u);
 
 	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
+#endif
 
 	/* Analog pin configuration - used for temperature sensor */
 	GPIO_PinConfiguration.GPIO_PinNumber = 1u;
@@ -99,14 +101,16 @@ static void GPIO_Config(void)
 
 int main(void)
 {
-	initialise_monitor_handles();
+    initialise_monitor_handles();
 
-	uint8  u_acState      = CHECK_TEMP_UPPER;
-	sint8  u_debounce     = 0u;
-	uint16 u_adcValue     = 0u;
-	uint32 u_code[3]      = {0xFF00FF00u, 0xFF00EB14u, 0xFE0154AB};
-	float  f_temperature  = 0.0f;
+	uint8  u_acState           = CHECK_TEMP_UPPER;
+	sint8  u_debounce          = 0u;
+	uint16 u_adcValue          = 0u;
+	uint32 u_powerOnCodes[3]   = {0xFF00FF00u, 0xFF00AB54u, 0x1BE454ABu}; /* No timer, horizontal swing, fast speed, 23 degrees C cooling */
+	uint32 u_powerOffCodes[3]  = {0xFF00FF00u, 0xFF00EB14u, 0xFE0154ABu};
+
 	float  f_tempOld      = 0.0f;
+	float  f_temperature  = 0.0f;
 
 	/* 16 MHz frequency */
 	PLL_Enable(RCC_CFGR_PLLMUL4);
@@ -121,13 +125,13 @@ int main(void)
 
 	while(1)
 	{
-		/* Not tested  */
+		#if (CAPTURE_MODE == STD_OFF)
         switch (u_acState) {
 			case CHECK_TEMP_UPPER:
 
 				  u_adcValue = ADCx_u_Read(ADC1);
 				  f_temperature = Temp_f_CalculateTemperature(u_adcValue);
-				  Delay_v_ms(500u);
+				  Delay_v_ms(100u);
 
 				  if(f_temperature > UPPER_TEMP_THRESHOLD)
 				  {
@@ -147,7 +151,7 @@ int main(void)
 				break;
 			case AC_POWER_ON:
 
-				NEC_v_SendMessage(u_code, sizeof(u_code));
+				NEC_v_SendMessage((uint32*)u_powerOnCodes, sizeof(u_powerOnCodes) / sizeof(u_powerOnCodes[0]));
 				u_acState = CHECK_IF_AC_IS_ON;
 
 				break;
@@ -156,7 +160,7 @@ int main(void)
 				u_adcValue = ADCx_u_Read(ADC1);
 				f_tempOld = Temp_f_CalculateTemperature(u_adcValue);
 
-				Delay_v_seconds(240u);  /* Wait 6 minutes and check if temperature drops. TODO: Change this logic */
+				Delay_v_seconds(60u);  /* Wait 6 minutes and check if temperature drops. TODO: Change this logic */
 
 				u_adcValue = ADCx_u_Read(ADC1);
 				f_temperature = Temp_f_CalculateTemperature(u_adcValue);
@@ -175,7 +179,8 @@ int main(void)
 
 				  u_adcValue = ADCx_u_Read(ADC1);
 				  f_temperature = Temp_f_CalculateTemperature(u_adcValue);
-				  Delay_v_ms(500u);
+				  Delay_v_ms(100u);
+
 				  if((f_temperature < LOWER_TEMP_THRESHOLD) && (u_debounce != 128u))
 				  {
 					  u_debounce++;
@@ -194,8 +199,8 @@ int main(void)
 				break;
 			case AC_POWER_OFF:
 
-				NEC_v_SendMessage(u_code, sizeof(u_code));
-				u_acState = CHECK_IF_AC_IS_ON;
+				NEC_v_SendMessage((uint32*)u_powerOffCodes, sizeof(u_powerOffCodes) / sizeof(u_powerOffCodes[0]));
+				u_acState = CHECK_IF_AC_IS_OFF;
 
 				break;
 			case CHECK_IF_AC_IS_OFF:
@@ -203,7 +208,8 @@ int main(void)
 				u_adcValue = ADCx_u_Read(ADC1);
 				f_tempOld = Temp_f_CalculateTemperature(u_adcValue);
 
-				Delay_v_seconds(240u);  /* Wait 6 minutes and check if temperature drops. TODO: Change this logic */
+				Delay_v_seconds(60u);  /* Wait 6 minutes and check if temperature drops. TODO: Change this logic */
+
 
 				u_adcValue = ADCx_u_Read(ADC1);
 				f_temperature = Temp_f_CalculateTemperature(u_adcValue);
@@ -214,13 +220,14 @@ int main(void)
 				}
 				else
 				{
-					u_acState = CHECK_TEMP_LOWER;
+					u_acState = CHECK_TEMP_UPPER;
 				}
 
 				break;
 			default:
 				u_acState = CHECK_TEMP_UPPER;
 				break;
-		}
+        }
+		#endif
 	}
 }
