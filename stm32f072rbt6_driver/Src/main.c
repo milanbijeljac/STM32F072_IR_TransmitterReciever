@@ -58,7 +58,6 @@ static void GPIO_Config(void);
 
 static void GPIO_Config(void)
 {
-	/* TODO: Add compiler switches for different modes, currently not all of this code needs to be executed */
 
 	GPIO_v_PeripheralClockControl(GPIOB, ENABLE);
 	GPIO_v_PeripheralClockControl(GPIOA, ENABLE);

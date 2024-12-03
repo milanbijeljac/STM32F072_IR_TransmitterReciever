@@ -15,7 +15,6 @@
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -26,7 +25,6 @@ uint8 ADCx_u_Init(ADC_TypeDef* p_ADCx, uint8 channel);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *

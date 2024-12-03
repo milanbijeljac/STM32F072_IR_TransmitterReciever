@@ -37,7 +37,7 @@
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
+
  * \return     - TODO
  * \globals    - TODO
  *
@@ -48,7 +48,7 @@ static void NEC_PulseOn(void);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
+
  * \return     - TODO
  * \globals    - TODO
  *
@@ -59,7 +59,7 @@ static void NEC_PulseOff(void);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
+
  * \return     - TODO
  * \globals    - TODO
  *
@@ -70,7 +70,7 @@ static void NEC_v_SendWholePulse(uint32 duration);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
+
  * \return     - TODO
  * \globals    - TODO
  *
@@ -81,7 +81,7 @@ static void NEC_v_SendBit(uint8 u_bit);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
+
  * \return     - TODO
  * \globals    - TODO
  *
@@ -92,7 +92,7 @@ static void NEC_v_SendLeadingPulseBurst(void);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
+
  * \return     - TODO
  * \globals    - TODO
  *

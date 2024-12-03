@@ -367,9 +367,8 @@ void GPIOx_BitToggleBsrr(GPIO_TypeDef *pGPIOx, uint8 pinNumber, uint8 u_pinSetOr
 
 uint8 GPOIx_u_PortCheck(GPIO_TypeDef *pGPIOx)
 {
-	/* TODO: Error Handling */
-
 	uint8 u_retVal = 0u;
+
 	if(pGPIOx == GPIOA)
 	{
 		u_retVal = 0;

@@ -16,7 +16,6 @@
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *

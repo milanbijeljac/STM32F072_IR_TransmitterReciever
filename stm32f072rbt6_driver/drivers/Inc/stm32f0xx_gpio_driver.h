@@ -80,7 +80,6 @@ typedef struct
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -91,7 +90,6 @@ void GPIO_v_PeripheralClockControl(GPIO_TypeDef *pGPIOx, uint8 enabledOrDisabled
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -102,7 +100,6 @@ void GPIO_v_Init(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfiguration);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -113,7 +110,6 @@ void GPIO_v_DeInit(GPIO_TypeDef *pGPIOx);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -124,7 +120,6 @@ uint8 GPIO_u_ReadFromInputPin(GPIO_TypeDef *pGPIOx, uint8 u_pinNumber);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -135,7 +130,6 @@ uint32 GPIO_u_ReadFromInputPort(GPIO_TypeDef *pGPIOx);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -146,7 +140,6 @@ void GPIO_v_WriteToOutputPin(GPIO_TypeDef *pGPIOx, uint8 u_pinNumber, uint8 u_va
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -157,7 +150,6 @@ void GPIO_v_WriteToOutputPort(GPIO_TypeDef *pGPIOx, uint32 u_value);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -168,7 +160,6 @@ void GPIO_v_TogglePin(GPIO_TypeDef *pGPIOx, uint8 u_pinNumber);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -179,7 +170,6 @@ void GPIO_v_IRQInteruptConfig(uint8 IRQNumber, uint8 u_enableOrDisable);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -190,7 +180,6 @@ void GPIO_v_IRQPrioConfig(uint8 IRQPrio, uint8 u_IRQPriority);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -201,7 +190,6 @@ void GPIO_v_IRQHandling(uint8 u_pinNumber);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -212,7 +200,6 @@ void GPIOx_v_ModeConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfigura
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -223,7 +210,6 @@ void GPIOx_v_SpeedConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfigur
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -234,7 +220,6 @@ void GPIOx_v_PupdrConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfigur
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -245,7 +230,6 @@ void GPIOx_v_OutputConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfigu
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -256,7 +240,6 @@ void GPIOx_v_AlternateFunctionConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -267,7 +250,6 @@ void GPIOx_v_BitSetResetConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinCo
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
@@ -278,7 +260,6 @@ uint8 GPOIx_u_PortCheck(GPIO_TypeDef *pGPIOx);
  *
  * \brief      - TODO
  * \param[in]  - TODO
- * \param[out] - TODO
  * \return     - TODO
  * \globals    - TODO
  *
