@@ -27,15 +27,12 @@
 	static uint16 u_timeDiffMatrix[3][32];
 #endif
 
-volatile uint8 u_counterInterruptTrigger = 0u;
-
 static uint32 u_code[3]  = {0,0,0};
 
 /****************************************************/
 
 void EXTI4_15_IRQHandler(void)
 {
-	u_counterInterruptTrigger++;
 	EXTI->IMR &= ~(1 << 12u); /* Disable interrupt */
 
 	GPIO_v_IRQHandling(12u);
