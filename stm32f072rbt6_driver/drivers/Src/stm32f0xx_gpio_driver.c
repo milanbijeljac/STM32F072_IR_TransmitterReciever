@@ -2,6 +2,7 @@
  *			    	INCLUDES					    *
  *************************************************  */
 #include <stm32f0xx_gpio_driver.h>
+#include <stm32f0xx_error_handler.h>
 
 void GPIO_v_PeripheralClockControl(GPIO_TypeDef *pGPIOx, uint8 enabledOrDisabled)
 {
@@ -33,7 +34,7 @@ void GPIO_v_PeripheralClockControl(GPIO_TypeDef *pGPIOx, uint8 enabledOrDisabled
 		}
 		else
 		{
-			/* TODO: Report error: unknown GPIO port */
+			Error_v_Report(GPIOX_UNSUPPORTED_GPIO_PORT_ENABLE);
 		}
 	}
 	else
@@ -64,7 +65,7 @@ void GPIO_v_PeripheralClockControl(GPIO_TypeDef *pGPIOx, uint8 enabledOrDisabled
 		}
 		else
 		{
-			/* TODO: Report error: unknown GPIO port */
+			Error_v_Report(GPIOX_UNSUPPORTED_GPIO_PORT_DISABLE);
 		}
 	}
 }
@@ -72,10 +73,6 @@ void GPIO_v_PeripheralClockControl(GPIO_TypeDef *pGPIOx, uint8 enabledOrDisabled
 void GPIO_v_Init(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfiguration)
 {
 	/* Enable peripheral clock */
-
-	/* TODO: Call GPIO_PeripheralClockControl() here */
-
-	/* TODO: Error handling */
 
 	GPIOx_v_ModeConfig(pGPIOx, GPIO_PinConfiguration);
 
@@ -234,7 +231,7 @@ void GPIOx_v_ModeConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfigura
 		/* Non interrupt mode */
 	    pGPIOx->MODER |= GPIO_PinConfiguration.GPIO_PinMode << (GPIO_PinConfiguration.GPIO_PinNumber * 2);
 	}
-	else if(GPIO_PinConfiguration.GPIO_PinMode > ANALOG_MODE)
+	else if( (GPIO_PinConfiguration.GPIO_PinMode > ANALOG_MODE) && (GPIO_PinConfiguration.GPIO_PinMode <= RISING_FALLING_TRIGGER) )
 	{
 		/* Interrupt mode */
 		if(GPIO_PinConfiguration.GPIO_PinMode == FALING_TRIGGER)
@@ -282,60 +279,75 @@ void GPIOx_v_ModeConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfigura
 	}
 	else
 	{
-		/* TODO: Error handling */
+		Error_v_Report(GPIOX_UNSUPPORTED_MODE);
 	}
 }
 
 
 void GPIOx_v_SpeedConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfiguration)
 {
-	/* Perform clear bit operation */
-	pGPIOx->OSPEEDR &= ~(CLEAR_2_BITS << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
+	if(GPIO_PinConfiguration.GPIO_PinSpeed > HIGH_SPEED)
+	{
+		Error_v_Report(GPIOX_UNSUPPORTED_SPEED_CONFGURATION);
+	}
+	else
+	{
+		/* Perform clear bit operation */
+		pGPIOx->OSPEEDR &= ~(CLEAR_2_BITS << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
 
-	pGPIOx->OSPEEDR |= GPIO_PinConfiguration.GPIO_PinSpeed << (GPIO_PinConfiguration.GPIO_PinNumber * 2);
+		pGPIOx->OSPEEDR |= GPIO_PinConfiguration.GPIO_PinSpeed << (GPIO_PinConfiguration.GPIO_PinNumber * 2);
+	}
 
-	/* TODO: Error handling of exception */
 }
 
 void GPIOx_v_PupdrConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfiguration)
 {
-	/* Perform clear bit operation */
-	pGPIOx->PUPDR &= ~(CLEAR_2_BITS << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
-	pGPIOx->PUPDR |= GPIO_PinConfiguration.GPIO_PinPuPdControl << (GPIO_PinConfiguration.GPIO_PinNumber * 2);
-
-	/* TODO: Error handling of exception */
+	if(GPIO_PinConfiguration.GPIO_PinPuPdControl > RESERVED_PUPDR)
+	{
+		Error_v_Report(GPIOX_UNSUPPORTED_PUPDR_CONFIGURATION);
+	}
+	else
+	{
+		/* Perform clear bit operation */
+		pGPIOx->PUPDR &= ~(CLEAR_2_BITS << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
+		pGPIOx->PUPDR |= GPIO_PinConfiguration.GPIO_PinPuPdControl << (GPIO_PinConfiguration.GPIO_PinNumber * 2);
+	}
 }
 
 void GPIOx_v_OutputConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfiguration)
 {
-	/* Perform clear bit operation */
-	pGPIOx->OTYPER &= ~(CLEAR_1_BIT << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
-	pGPIOx->OTYPER |= GPIO_PinConfiguration.GPIO_PinOPType << GPIO_PinConfiguration.GPIO_PinNumber;
-
-	/* TODO: Error handling of exception */
+	if(GPIO_PinConfiguration.GPIO_PinNumber > GPIOX_LAST_PIN)
+	{
+		Error_v_Report(GPIOX_UNSUPPORTED_PIN);
+	}
+	else
+	{
+		/* Perform clear bit operation */
+		pGPIOx->OTYPER &= ~(CLEAR_1_BIT << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
+		pGPIOx->OTYPER |= GPIO_PinConfiguration.GPIO_PinOPType << GPIO_PinConfiguration.GPIO_PinNumber;
+	}
 }
 
 void GPIOx_v_AlternateFunctionConfig(GPIO_TypeDef *pGPIOx, GPIO_PinConfig_t GPIO_PinConfiguration)
 {
+	if(GPIO_PinConfiguration.GPIO_PinAltFunMode > AF7)
+	{
+		Error_v_Report(GPIOX_UNSUPPORTED_ALTERNATE_FUNCTIONALLITY);
+		return;
+	}
+
 	if(GPIO_PinConfiguration.GPIO_PinNumber <= PIN_SEPARATION)
 	{
 		/* Perform clear bit operation */
 		pGPIOx->AFR[0] &= ~(CLEAR_4_BITS << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
 		pGPIOx->AFR[0] |= GPIO_PinConfiguration.GPIO_PinAltFunMode << (GPIO_PinConfiguration.GPIO_PinNumber * 4);
 
-		/* TODO: Error handling of exception */
 	}
 	else if(GPIO_PinConfiguration.GPIO_PinNumber > PIN_SEPARATION)
 	{
 		/* Perform clear bit operation */
 		pGPIOx->AFR[1] &= ~(CLEAR_4_BITS << (GPIO_PinConfiguration.GPIO_PinNumber * 2));
 		pGPIOx->AFR[1] |= GPIO_PinConfiguration.GPIO_PinAltFunMode << ((GPIO_PinConfiguration.GPIO_PinNumber - 8u) * 4);
-
-		/* TODO: Error handling of exception */
-	}
-	else
-	{
-		/* TODO: Error handling of exception */
 	}
 }
 

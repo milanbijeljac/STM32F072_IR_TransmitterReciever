@@ -56,6 +56,9 @@
 #define CLEAR_2_BITS 				3u
 #define CLEAR_4_BITS				4u
 
+/* Macro that represents value of last GPIOx PIN */
+
+#define GPIOX_LAST_PIN				15u
 
 /* **************************************************
  *			    GLOBAL VARIABLES 					*
