@@ -96,6 +96,24 @@ static void GPIO_Config(void)
 	GPIO_v_Init(GPIOA, GPIO_PinConfiguration);
 
 	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
+
+	/* USART2 Tx configuration. AF1 == USART2_TX */
+	GPIO_PinConfiguration.GPIO_PinNumber = 2u;
+	GPIO_PinConfiguration.GPIO_PinMode = ALTERNATE_FUNCTION_MODE;
+	GPIO_PinConfiguration.GPIO_PinAltFunMode = AF1;
+
+	GPIO_v_Init(GPIOA, GPIO_PinConfiguration);
+
+	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
+
+	/* USART2 Tx configuration. AF1 == USART2_TR */
+	GPIO_PinConfiguration.GPIO_PinNumber = 3u;
+	GPIO_PinConfiguration.GPIO_PinMode = ALTERNATE_FUNCTION_MODE;
+	GPIO_PinConfiguration.GPIO_PinAltFunMode = AF1;
+
+	GPIO_v_Init(GPIOA, GPIO_PinConfiguration);
+
+	GPIOx_v_GPIOCfgStructClear(&GPIO_PinConfiguration);
 }
 
 int main(void)
@@ -113,6 +131,8 @@ int main(void)
 
 	/* 16 MHz frequency */
 	PLL_Enable(RCC_CFGR_PLLMUL4);
+
+	UART_v_Init(16000000, 115200);
 
 	TIM3_v_cfg(16u);
 
