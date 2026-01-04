@@ -148,3 +148,13 @@ void EXTI4_15_IRQHandler(void)
 
 	EXTI->IMR |= (1 << 12u); /* Enable interrupt */
 }
+
+void USART2_IRQHandler(void)
+{
+	if (USART2->ISR & USART_ISR_RXNE)
+	{
+		uint8 receivedByte = USART2->RDR;
+		UARTRing_v_WriteElement(&receivedByte, 1);
+	}
+}
+

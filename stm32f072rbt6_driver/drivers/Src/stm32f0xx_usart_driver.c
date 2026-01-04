@@ -5,6 +5,8 @@
 #include <stm32f0xx_error_handler.h>
 #include <stm32f0xx_usart_driver.h>
 #include <stm32f072x8.h>
+#include <core_cm0.h>
+#include <stm32f072x8.h>
 
 /* **************************************************
  *			   	       GLOBALS  					*
@@ -101,41 +103,33 @@ uint8 UARTRing_v_ReadElement(uint8 *u_data, uint8 u_size)
 	return u_retVal;
 }
 
-
-void USARTx_v_Init(USART_TypeDef* p_USARTx)
+void UART_v_Init(uint32 clock, uint32 baudRate)
 {
-	if(p_USARTx == USART1)
-	{
-		RCC->APB2ENR |= 1u << 14u;
-	}
-	else if(p_USARTx == USART2)
-	{
-		RCC->APB1ENR |= 1u << 17u;
-	}
-	else if(p_USARTx == USART3)
-	{
-		RCC->APB1ENR |= 1u << 18u;
-	}
-	else if(p_USARTx == USART4)
-	{
-		RCC->APB1ENR |= 1u << 19u;
-	}
-	else
-	{
-		Error_v_Report(USART_UNSUPPORTED_USART_ID);
-	}
+    /* Clock initialization */
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+    /* Set baud rate */
+    USART2->BRR = clock / baudRate;
 
 	/* Clear M0 and M1 bits, M00 for 8 bit mode) */
-	p_USARTx->CR1 &= ~(1u << 12u);
-	p_USARTx->CR1 &= ~(1u << 28u);
+    USART2->CR1 &= ~(USART_CR1_M);
+    USART2->CR1 &= ~(1u << 28u);
 
-	/* Set baud rate to 115.2 KBps */
-	p_USARTx->BRR = 0x1A1u;
+    /* 			 Enable TX 			Enable RX	  Enable RX IR		 Enable USART  */
+    USART2->CR1 = USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE | USART_CR1_UE;
 
-	/* Set 1 stop bit */
-	p_USARTx->CR2 &= ~(1u << 0);
-
-	/* Enable USART */
-	p_USARTx->CR1 |= 1u << 0u;
-
+    NVIC_EnableIRQ(USART2_IRQn);
 }
+
+
+void UART_v_Write_Message(uint8* data, uint8 size)
+{
+	uint8 i;
+
+    for (i = 0; i < size; i++)
+    {
+        while (!(USART2->ISR & USART_ISR_TXE));
+        USART2->TDR = data[i];
+    }
+}
+
