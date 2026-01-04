@@ -121,7 +121,7 @@ int main(void)
     initialise_monitor_handles();
 
 	uint8  u_acState           = CHECK_TEMP_UPPER;
-	sint8  u_debounce          = 0u;
+	sint8  s_debounce          = 0u;
 	uint16 u_adcValue          = 0u;
 	uint32 u_powerOnCodes[3]   = {0xFF00FF00u, 0xFF00AB54u, 0x1BE454ABu}; /* No timer, horizontal swing, fast speed, 23 degrees C cooling */
 	uint32 u_powerOffCodes[3]  = {0xFF00FF00u, 0xFF00EB14u, 0xFE0154ABu};
@@ -154,17 +154,17 @@ int main(void)
 
 				  if(f_temperature > UPPER_TEMP_THRESHOLD)
 				  {
-					  u_debounce++;
+					  s_debounce++;
 				  }
-				  else if(u_debounce != -127)
+				  else if(s_debounce != -127)
 				  {
-					  u_debounce--;
+					  s_debounce--;
 				  }
 
-				  if(u_debounce > DEBOUNCE_UP_THRESHOLD)
+				  if(s_debounce > DEBOUNCE_UP_THRESHOLD)
 				  {
 					  u_acState =  AC_POWER_ON;
-					  u_debounce = 0;
+					  s_debounce = 0;
 				  }
 
 				break;
@@ -200,19 +200,19 @@ int main(void)
 				  f_temperature = Temp_f_CalculateTemperature(u_adcValue);
 				  Delay_v_ms(100u);
 
-				  if((f_temperature < LOWER_TEMP_THRESHOLD) && (u_debounce != 128u))
+				  if((f_temperature < LOWER_TEMP_THRESHOLD) && (s_debounce != 128u))
 				  {
-					  u_debounce++;
+					  s_debounce++;
 				  }
-				  else if(u_debounce != -127)
+				  else if(s_debounce != -127)
 				  {
-					  u_debounce--;
+					  s_debounce--;
 				  }
 
-				  if(u_debounce > DEBOUNCE_UP_THRESHOLD)
+				  if(s_debounce > DEBOUNCE_UP_THRESHOLD)
 				  {
 					  u_acState =  AC_POWER_OFF;
-					  u_debounce = 0;
+					  s_debounce = 0;
 				  }
 
 				break;
